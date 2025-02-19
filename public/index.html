@@ -7,11 +7,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #00a1df;
-            --primary-hover: #0082b3;
-            --background-color: #f8f9fa;
-            --text-color: #2d3436;
-            --border-color: #e1e4e8;
+            --primary-color: #2a3f7c;
+            --primary-hover: #3a5299;
+            --background-color: #1e1e2e;
+            --text-color: #e4e6f1;
+            --border-color: #3a5299;
+            --button-bg: #3a5299;
+            --button-text: #ffffff;
         }
 
         body {
@@ -24,205 +26,348 @@
             line-height: 1.6;
         }
 
+        .page-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .page-header h1 {
+            margin: 0 0 15px 0;
+            font-size: 2.5rem;
+            color: var(--text-color);
+        }
+
+        .page-header p {
+            margin: 0;
+            color: var(--text-color);
+            font-size: 0.95rem;
+        }
+
+        .header-content {
+            position: relative;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .github-link {
+            position: fixed;
+            right: 20px;
+            top: 20px;
+            color: var(--text-color);
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+            z-index: 100;
+        }
+
+        .github-link:hover {
+            opacity: 1;
+        }
+
         .container {
             display: flex;
             flex-direction: column;
             gap: 30px;
-            background-color: white;
+            background-color: #1a1f3c;
             padding: 40px;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
-        h1 {
-            margin: 0;
-            font-size: 2.5em;
-            font-weight: 600;
-            color: var(--primary-color);
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 30px;
         }
 
-        h2 {
+        .header h1 {
             margin: 0;
-            font-size: 1.25em;
-            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .header p {
+            margin: 0;
             color: var(--text-color);
+        }
+
+        .main-content {
+            display: flex;
+            gap: 30px;
+        }
+
+        .left-panel {
+            flex: 0 0 35%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .right-panel {
+            flex: 0 0 60%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
         .input-area {
             display: flex;
             flex-direction: column;
             gap: 15px;
+            height: 100%;
         }
 
-        input[type="text"] {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.2s ease;
-            background-color: white;
-            color: var(--text-color);
+        .input-area h2 {
+            font-size: 1rem;
+            margin: 0 0 8px 0;
         }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(0, 161, 223, 0.1);
-        }
-
-        .button-group {
+        .output-container {
+            flex-grow: 1;
             display: flex;
-            gap: 12px;
-            margin-top: 5px;
+            flex-direction: column;
+            gap: 10px;
+            position: relative;
         }
 
-        button {
-            padding: 12px 24px;
-            background-color: var(--primary-color);
-            color: white;
+        .output-actions {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .output-action {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background-color: var(--button-bg);
+            color: var(--button-text);
             border: none;
-            border-radius: 8px;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 13px;
             cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
             transition: all 0.2s ease;
         }
 
-        button:hover {
+        .output-action:hover {
             background-color: var(--primary-hover);
             transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        button:active {
+        .output-action:active {
             transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            background-color: var(--primary-color);
+        }
+
+        .output-action svg {
+            transition: transform 0.2s ease;
+        }
+
+        .output-action:hover svg {
+            transform: scale(1.1);
+        }
+
+        .command-display {
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            color: #888;
+            padding: 8px;
+            word-break: break-all;
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            display: none;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 10px;
         }
 
         .output-area {
             border: 2px solid var(--border-color);
             border-radius: 8px;
             padding: 20px;
-            min-height: 200px;
+            flex-grow: 1;
+            min-height: 400px;
             white-space: pre-wrap;
-            background-color: white;
+            background-color: #121212;
             font-family: 'Monaco', 'Consolas', monospace;
             font-size: 14px;
             line-height: 1.5;
             overflow-x: auto;
+            color: var(--text-color);
+            display: block;
         }
     </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Kong Deck Online</h1>
-        <div class="input-area">
-            <h2>Kong Admin API Endpoint</h2>
-            <input type="text" id="endpoint-input" placeholder="http://localhost:8001" />
-            <h2>Admin Token</h2>
-            <input type="text" id="token-input" placeholder="Enter Admin Token (Optional)" />
-            <div class="button-group">
-                <button onclick="executeDeckCommand()">Execute Deck Dump</button>
-                <button onclick="executePingCommand()">Execute Deck Ping</button>
-            </div>
-        </div>
-        <div class="command-preview">Command to execute:</div>
-        <div class="output-area" id="command-output">
-            Output will appear here...
-        </div>
-    </div>
-
-    <style>
-        .input-group {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .input-group input {
-            flex: 1;
-        }
-
-        .command-preview {
-            color: #666;
-            font-size: 12px;
-            font-family: 'Monaco', 'Consolas', monospace;
-            margin-bottom: 8px;
-            padding: 8px;
-            background-color: #f5f5f5;
-            border-radius: 4px;
-        }
-    </style>
-
     <script>
-        async function executePingCommand() {
-            const endpoint = document.getElementById('endpoint-input').value;
-            const token = document.getElementById('token-input').value;
-            const outputArea = document.getElementById('command-output');
-            const previewArea = document.querySelector('.command-preview');
-            
-            if (!endpoint) {
-                outputArea.textContent = 'Error: Please enter Kong Admin API endpoint';
-                return;
-            }
-
-            let command = `deck gateway ping --kong-addr ${endpoint}`;
-            if (token) {
-                command += ` --headers Kong-Admin-Token:${token}`;
-            }
-            
-            previewArea.textContent = `Command to execute: ${command}`;
-            
-            try {
-                outputArea.textContent = 'Executing command...';
-                const response = await fetch('/execute', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ command })
-                });
-                
-                const data = await response.json();
-                outputArea.textContent = data.output || data.error;
-            } catch (error) {
-                outputArea.textContent = `Error: ${error.message}`;
+        function updateOutputActionVisibility() {
+            const outputArea = document.getElementById('output');
+            const outputActions = document.querySelector('.output-actions');
+            if (outputArea.textContent.trim()) {
+                outputActions.style.opacity = '1';
+                outputActions.style.visibility = 'visible';
+            } else {
+                outputActions.style.opacity = '0';
+                outputActions.style.visibility = 'hidden';
             }
         }
 
-        async function executeDeckCommand() {
+        // 页面加载时初始化按钮状态
+        document.addEventListener('DOMContentLoaded', updateOutputActionVisibility);
+
+        async function executeDeckCommand(command) {
+            // Reset copy button text
+            const copyButton = document.querySelector('.output-action');
+            copyButton.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                Copy`;
+
             const endpoint = document.getElementById('endpoint-input').value;
             const token = document.getElementById('token-input').value;
-            const outputArea = document.getElementById('command-output');
-            const previewArea = document.querySelector('.command-preview');
-            
-            if (!endpoint) {
-                outputArea.textContent = 'Error: Please enter Kong Admin API endpoint';
-                return;
-            }
-
-            let command = `deck gateway dump --kong-addr ${endpoint}`;
-            if (token) {
-                command += ` --headers Kong-Admin-Token:${token}`;
-            }
-            
-            previewArea.textContent = `Command to execute: ${command}`;
-            
+            const outputArea = document.getElementById('output');
+            const commandDisplay = document.getElementById('command-display');
+            const deckCommand = `deck gateway ${command} --kong-addr ${endpoint} ${token ? `--headers "kong-admin-token: ${token}"` : ''}`;
+        
+            // Display the executed command
+            commandDisplay.style.display = 'block';
+            commandDisplay.textContent = deckCommand;
+            outputArea.textContent = 'Executing...';
+            updateOutputActionVisibility();
+        
             try {
-                outputArea.textContent = 'Executing command...';
                 const response = await fetch('/execute', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ command })
+                    body: JSON.stringify({
+                        command: deckCommand
+                    })
                 });
-                
+        
                 const data = await response.json();
-                outputArea.textContent = data.output || data.error;
+                if (data.error) {
+                    outputArea.textContent = data.error;
+                } else {
+                    outputArea.textContent = data.output;
+                }
+                updateOutputActionVisibility();
             } catch (error) {
-                outputArea.textContent = `Error: ${error.message}`;
+                outputArea.textContent = `Execution error: ${error.message}`;
+                updateOutputActionVisibility();
             }
+        }
+
+        function copyOutput() {
+            const outputText = document.getElementById('output').textContent;
+            const copyButton = document.querySelector('.output-action');
+            navigator.clipboard.writeText(outputText)
+                .then(() => {
+                    copyButton.innerHTML = `
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        Copied!`;
+                })
+                .catch(err => console.error('Failed to copy text:', err));
+        }
+
+        function downloadOutput() {
+            const outputText = document.getElementById('output').textContent;
+            const blob = new Blob([outputText], { type: 'text/yaml' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'kong-config.yaml';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
         }
     </script>
+</head>
+<body>
+    <div class="page-header">
+        <div class="header-content">
+            <h1>Kong Deck Online</h1>
+            <p>This is a web tool designed to simplify Kong configuration management. Simply enter your Kong Admin API address and Admin Token (if required), then click the corresponding button to execute deck commands.</p>
+            <a href="https://github.com/xibuka/kong-deck-online" class="github-link" target="_blank" rel="noopener noreferrer">
+                <svg height="32" aria-hidden="true" viewBox="0 0 16 16" version="1.1" width="32">
+                    <path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="container">
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="input-area">
+                    <h2>Kong Admin API Endpoint</h2>
+                    <input type="text" id="endpoint-input" placeholder="http://localhost:8001" />
+                    <h2>Admin Token</h2>
+                    <input type="text" id="token-input" placeholder="Enter Admin Token (Optional)" />
+                    <div class="button-group">
+                        <button onclick="executeDeckCommand('ping')" class="action-button">ping</button>
+                        <button onclick="executeDeckCommand('dump')" class="action-button">dump</button>
+                        <button onclick="executeDeckCommand('diff')" class="action-button" disabled>diff</button>
+                        <button onclick="executeDeckCommand('validate')" class="action-button" disabled>validate</button>
+                        <button onclick="executeDeckCommand('sync')" class="action-button" disabled>sync</button>
+                        <button onclick="executeDeckCommand('reset')" class="action-button" disabled>reset</button>
+                    </div>
+                    <div id="command-display" class="command-display"></div>
+                </div>
+            </div>
+            <div class="right-panel">
+                <div class="output-container">
+                    <div id="output" class="output-area"></div>
+                    <div class="output-actions">
+                        <div onclick="copyOutput()" class="output-action">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            Copy
+                        </div>
+                        <div onclick="downloadOutput()" class="output-action">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Download
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="page-footer">
+        <p>Created by <a href="https://wenhan.blog" target="_blank" rel="noopener noreferrer">xibuka</a></p>
+    </footer>
+    <style>
+        .page-footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+        .page-footer a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: opacity 0.3s ease;
+        }
+        .page-footer a:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+    </style>
 </body>
 </html>
