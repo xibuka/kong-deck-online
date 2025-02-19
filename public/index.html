@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kong Deck Online</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #00a1df;
+            --primary-hover: #0082b3;
+            --background-color: #f8f9fa;
+            --text-color: #2d3436;
+            --border-color: #e1e4e8;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 1.25em;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            background-color: white;
+            color: var(--text-color);
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 161, 223, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 5px;
+        }
+
+        button {
+            padding: 12px 24px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .output-area {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 200px;
+            white-space: pre-wrap;
+            background-color: white;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Kong Deck Online</h1>
+        <div class="input-area">
+            <h2>Kong Admin API Endpoint</h2>
+            <input type="text" id="endpoint-input" placeholder="http://localhost:8001" />
+            <h2>Admin Token</h2>
+            <input type="text" id="token-input" placeholder="Enter Admin Token (Optional)" />
+            <div class="button-group">
+                <button onclick="executeDeckCommand()">Execute Deck Dump</button>
+                <button onclick="executePingCommand()">Execute Deck Ping</button>
+            </div>
+        </div>
+        <div class="command-preview">Command to execute:</div>
+        <div class="output-area" id="command-output">
+            Output will appear here...
+        </div>
+    </div>
+
+    <style>
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .input-group input {
+            flex: 1;
+        }
+
+        .command-preview {
+            color: #666;
+            font-size: 12px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            margin-bottom: 8px;
+            padding: 8px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+    </style>
+
+    <script>
+        async function executePingCommand() {
+            const endpoint = document.getElementById('endpoint-input').value;
+            const token = document.getElementById('token-input').value;
+            const outputArea = document.getElementById('command-output');
+            const previewArea = document.querySelector('.command-preview');
+            
+            if (!endpoint) {
+                outputArea.textContent = 'Error: Please enter Kong Admin API endpoint';
+                return;
+            }
+
+            let command = `deck gateway ping --kong-addr ${endpoint}`;
+            if (token) {
+                command += ` --headers Kong-Admin-Token:${token}`;
+            }
+            
+            previewArea.textContent = `Command to execute: ${command}`;
+            
+            try {
+                outputArea.textContent = 'Executing command...';
+                const response = await fetch('/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ command })
+                });
+                
+                const data = await response.json();
+                outputArea.textContent = data.output || data.error;
+            } catch (error) {
+                outputArea.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function executeDeckCommand() {
+            const endpoint = document.getElementById('endpoint-input').value;
+            const token = document.getElementById('token-input').value;
+            const outputArea = document.getElementById('command-output');
+            const previewArea = document.querySelector('.command-preview');
+            
+            if (!endpoint) {
+                outputArea.textContent = 'Error: Please enter Kong Admin API endpoint';
+                return;
+            }
+
+            let command = `deck gateway dump --kong-addr ${endpoint}`;
+            if (token) {
+                command += ` --headers Kong-Admin-Token:${token}`;
+            }
+            
+            previewArea.textContent = `Command to execute: ${command}`;
+            
+            try {
+                outputArea.textContent = 'Executing command...';
+                const response = await fetch('/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ command })
+                });
+                
+                const data = await response.json();
+                outputArea.textContent = data.output || data.error;
+            } catch (error) {
+                outputArea.textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
