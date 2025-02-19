@@ -1,33 +1,42 @@
-FROM --platform=linux/amd64 node:18-slim
+# 构建阶段
+FROM --platform=linux/amd64 node:18-slim AS builder
 
 # 设置工作目录
 WORKDIR /app
 
-# 安装必要的软件包
-RUN apt-get update && apt-get install -y \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# 安装deck
-RUN curl -sL https://github.com/kong/deck/releases/download/v1.44.2/deck_1.44.2_linux_amd64.tar.gz -o deck.tar.gz \
-    && tar -xf deck.tar.gz \
-    && mv deck /usr/local/bin/ \
-    && rm deck.tar.gz
-
-# 复制package.json和package-lock.json
+# 复制package.json
 COPY package*.json ./
 
-# 安装依赖
-RUN npm install
+# 仅安装生产环境依赖
+RUN npm ci --only=production
 
-# 复制其他应用文件
+# 复制应用文件
 COPY . .
 
-# 暴露端口
-EXPOSE 80
+# 生产阶段
+FROM --platform=linux/amd64 node:18-slim
 
-# 设置环境变量
+# 安装deck
+RUN apt-get update && apt-get install -y curl \
+    && curl -sL https://github.com/kong/deck/releases/download/v1.44.2/deck_1.44.2_linux_amd64.tar.gz -o deck.tar.gz \
+    && tar -xf deck.tar.gz \
+    && mv deck /usr/local/bin/ \
+    && rm deck.tar.gz \
+    && apt-get remove -y curl \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# 从构建阶段复制必要文件
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/server.js ./
+COPY --from=builder /app/public ./public
+
+# 设置环境变量和端口
 ENV PORT=80
+EXPOSE 80
 
 # 启动应用
 CMD ["npm", "start"]

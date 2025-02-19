@@ -25,6 +25,10 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+    - name: Get current date
+      id: date
+      run: echo "date=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
+
     - name: Build and push Docker image
       uses: docker/build-push-action@v4
       with:
@@ -32,6 +36,6 @@ jobs:
         push: ${{ github.event_name != 'pull_request' }}
         tags: |
           wenhan/kong-deck-online:latest
-          wenhan/kong-deck-online:${{ github.sha }}
+          wenhan/kong-deck-online:${{ steps.date.outputs.date }}
         cache-from: type=registry,ref=wenhan/kong-deck-online:latest
         cache-to: type=inline
