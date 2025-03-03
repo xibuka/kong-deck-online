@@ -2,6 +2,8 @@
 
 Kong Deck Online is a web-based interface for executing Kong Deck commands. It provides a simple and user-friendly way to interact with Kong Gateway using deck commands through a web browser. The tool supports both Kong Enterprise and Konnect modes, making it versatile for different Kong deployment scenarios.
 
+![Kong Deck Online Screenshot](public/kongdeck.png)
+
 ## Features
 
 - Web interface for executing deck commands
