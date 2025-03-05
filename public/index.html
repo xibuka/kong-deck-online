@@ -311,14 +311,8 @@
             updateOutputActionVisibility();
         
             try {
-                const response = await fetch('/execute', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        command: deckCommand
-                    })
+                const response = await fetch(`/execute?command=${encodeURIComponent(deckCommand)}`, {
+                    method: 'GET'
                 });
         
                 const data = await response.json();

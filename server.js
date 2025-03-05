@@ -11,16 +11,16 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 
 // Handle deck command execution request
-app.post('/execute', (req, res) => {
-    const { command } = req.body;
+app.get('/execute', (req, res) => {
+    const command = req.query.command;
     
     if (!command) {
         return res.status(400).json({ error: 'Command is required' });
     }
 
-    // Ensure command starts with 'deck'
-    if (!command.trim().startsWith('deck')) {
-        return res.status(400).json({ error: 'Only deck commands are allowed' });
+    // Ensure command starts with 'deck' and contains only allowed characters
+    if (!command.trim().startsWith('deck') || !/^[a-zA-Z0-9\s\-_="\/\.:]+$/.test(command)) {
+        return res.status(400).json({ error: 'Invalid command format or characters' });
     }
 
     exec(command, (error, stdout, stderr) => {
