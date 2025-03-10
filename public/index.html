@@ -275,7 +275,7 @@
         // 页面加载时初始化按钮状态
         document.addEventListener('DOMContentLoaded', updateOutputActionVisibility);
 
-        async function executeDeckCommand(command, tabId) {
+        async function executeDeckCommand(operation, tabId) {
             // Reset copy button text
             const copyButton = document.querySelector('.output-action');
             copyButton.innerHTML = `
@@ -285,36 +285,51 @@
                 </svg>
                 Copy`;
         
-            let endpoint, token, controlPlane, pat;
-            if (tabId === 'enterprise') {
-                endpoint = document.getElementById('endpoint-input-enterprise').value;
-                token = document.getElementById('token-input-enterprise').value;
-            } else if (tabId === 'konnect') {
-                controlPlane = document.getElementById('konnect-cp').value;
-                pat = document.getElementById('konnect-pat').value;
-            }
-
-            let deckCommand;
-            if (tabId === 'enterprise') {
-                deckCommand = `deck gateway ${command} --kong-addr ${endpoint} ${token ? `--headers "kong-admin-token: ${token}"` : ''}`;
-            } else if (tabId === 'konnect') {
-                deckCommand = `deck gateway ${command} --konnect-control-plane-name ${controlPlane} ${pat ? `--konnect-token ${pat}` : ''}`;
-            }
-
             const outputArea = document.getElementById('output');
             const commandDisplay = document.getElementById('command-display');
-        
-            // Display the executed command
-            commandDisplay.style.display = 'block';
-            commandDisplay.textContent = deckCommand;
+            
             outputArea.textContent = 'Executing...';
             updateOutputActionVisibility();
-        
+            
             try {
-                const response = await fetch(`/execute?command=${encodeURIComponent(deckCommand)}`, {
-                    method: 'GET'
+                let apiEndpoint, requestBody;
+                
+                if (tabId === 'enterprise') {
+                    const endpoint = document.getElementById('endpoint-input-enterprise').value;
+                    const token = document.getElementById('token-input-enterprise').value;
+                    
+                    // Construct API endpoint and request body for Enterprise mode
+                    apiEndpoint = `/api/enterprise/${operation}`;
+                    requestBody = { endpoint, token };
+                    
+                    // Display command preview (for user information only)
+                    const commandPreview = `deck gateway ${operation} --kong-addr ${endpoint} ${token ? `--headers "kong-admin-token: ${token}"` : ''}`;
+                    commandDisplay.style.display = 'block';
+                    commandDisplay.textContent = commandPreview;
+                    
+                } else if (tabId === 'konnect') {
+                    const controlPlane = document.getElementById('konnect-cp').value;
+                    const pat = document.getElementById('konnect-pat').value;
+                    
+                    // Construct API endpoint and request body for Konnect mode
+                    apiEndpoint = `/api/konnect/${operation}`;
+                    requestBody = { controlPlane, pat };
+                    
+                    // Display command preview (for user information only)
+                    const commandPreview = `deck gateway ${operation} --konnect-control-plane-name ${controlPlane} ${pat ? `--konnect-token ${pat}` : ''}`;
+                    commandDisplay.style.display = 'block';
+                    commandDisplay.textContent = commandPreview;
+                }
+                
+                // Send POST request to the appropriate API endpoint
+                const response = await fetch(apiEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
                 });
-        
+                
                 const data = await response.json();
                 if (data.error) {
                     outputArea.textContent = data.error;
