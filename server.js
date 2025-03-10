@@ -19,7 +19,8 @@ const validateEndpoint = (endpoint) => {
 
 const validateToken = (token) => {
     // Validate token contains only allowed characters
-    return /^[\w\-\.]+$/.test(token);
+    // Updated to allow more characters including special characters
+    return /^[\w\-\.\+\=\/@:;,\?!\*\(\)\[\]\{\}\s]+$/.test(token);
 };
 
 const validateControlPlaneName = (name) => {

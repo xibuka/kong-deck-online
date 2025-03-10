@@ -134,6 +134,18 @@
             color: var(--text-color);
             font-size: 14px;
         }
+        
+        .input-group {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .error-message {
+            color: #ff6b6b;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
         .output-container {
             flex-grow: 1;
             display: flex;
@@ -260,6 +272,77 @@
         }
     </style>
     <script>
+        // Validation functions
+        function validateEndpoint(endpoint) {
+            const urlPattern = /^https?:\/\/[\w\.-]+(:\d+)?(\/[\w\.-]*)*\/?$/;
+            return urlPattern.test(endpoint);
+        }
+        
+        function validateToken(token) {
+            if (!token) return true; // Token is optional
+            // Updated to allow more characters including special characters
+            return /^[\w\-\.\+\=\/@:;,\?!\*\(\)\[\]\{\}\s]+$/.test(token);
+        }
+        
+        function validateControlPlaneName(name) {
+            return /^[\w\-\.]+$/.test(name);
+        }
+        
+        function showError(inputId, errorMessage) {
+            const errorElement = document.getElementById(inputId + '-error');
+            if (errorElement) {
+                errorElement.textContent = errorMessage;
+                errorElement.style.display = 'block';
+            }
+        }
+        
+        function clearError(inputId) {
+            const errorElement = document.getElementById(inputId + '-error');
+            if (errorElement) {
+                errorElement.style.display = 'none';
+            }
+        }
+        
+        function validateInput(inputId, validationFunction, errorMessage) {
+            const inputElement = document.getElementById(inputId);
+            const value = inputElement.value;
+            
+            if (!validationFunction(value)) {
+                showError(inputId, errorMessage);
+                return false;
+            } else {
+                clearError(inputId);
+                return true;
+            }
+        }
+        
+        // Add input event listeners for real-time validation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enterprise mode validation
+            const enterpriseEndpointInput = document.getElementById('endpoint-input-enterprise');
+            const enterpriseTokenInput = document.getElementById('token-input-enterprise');
+            
+            enterpriseEndpointInput.addEventListener('input', function() {
+                validateInput('endpoint-input-enterprise', validateEndpoint, 'Invalid endpoint format, please enter a valid URL (e.g.: http://localhost:8001)');
+            });
+            
+            enterpriseTokenInput.addEventListener('input', function() {
+                validateInput('token-input-enterprise', validateToken, 'Invalid token format, please ensure your token contains valid characters');
+            });
+            
+            // Konnect mode validation
+            const konnectCpInput = document.getElementById('konnect-cp');
+            const konnectPatInput = document.getElementById('konnect-pat');
+            
+            konnectCpInput.addEventListener('input', function() {
+                validateInput('konnect-cp', validateControlPlaneName, 'Invalid control plane name format, only letters, numbers, underscores, hyphens, and dots are allowed');
+            });
+            
+            konnectPatInput.addEventListener('input', function() {
+                validateInput('konnect-pat', validateToken, 'Invalid PAT format, please ensure your token contains valid characters');
+            });
+        });
+        
         function updateOutputActionVisibility() {
             const outputArea = document.getElementById('output');
             const outputActions = document.querySelector('.output-actions');
@@ -272,10 +355,23 @@
             }
         }
 
-        // 页面加载时初始化按钮状态
-        document.addEventListener('DOMContentLoaded', updateOutputActionVisibility);
-
         async function executeDeckCommand(operation, tabId) {
+            let isValid = true;
+            
+            if (tabId === 'enterprise') {
+                const endpointValid = validateInput('endpoint-input-enterprise', validateEndpoint, 'Invalid endpoint format, please enter a valid URL (e.g.: http://localhost:8001)');
+                const tokenValid = validateInput('token-input-enterprise', validateToken, 'Invalid token format, please ensure your token contains valid characters');
+                isValid = endpointValid && tokenValid;
+            } else if (tabId === 'konnect') {
+                const cpValid = validateInput('konnect-cp', validateControlPlaneName, 'Invalid control plane name format, only letters, numbers, underscores, hyphens, and dots are allowed');
+                const patValid = validateInput('konnect-pat', validateToken, 'Invalid PAT format, please ensure your token contains valid characters');
+                isValid = cpValid && patValid;
+            }
+            
+            if (!isValid) {
+                return; // Stop execution if validation fails
+            }
+            
             // Reset copy button text
             const copyButton = document.querySelector('.output-action');
             copyButton.innerHTML = `
@@ -406,9 +502,15 @@
                         </div>
                         <div id="enterprise" class="tab-content active">
                             <h3>Kong Admin API Endpoint</h3>
-                            <input type="text" id="endpoint-input-enterprise" value="http://localhost:8001" placeholder="http://localhost:8001" class="input-field" />
+                            <div class="input-group">
+                                <input type="text" id="endpoint-input-enterprise" value="http://localhost:8001" placeholder="http://localhost:8001" class="input-field" />
+                                <div id="endpoint-input-enterprise-error" class="error-message"></div>
+                            </div>
                             <h3>Admin Token</h3>
-                            <input type="text" id="token-input-enterprise" placeholder="Enter Admin Token (Optional)" class="input-field" />
+                            <div class="input-group">
+                                <input type="text" id="token-input-enterprise" placeholder="Enter Admin Token (Optional)" class="input-field" />
+                                <div id="token-input-enterprise-error" class="error-message"></div>
+                            </div>
                             <div class="button-group">
                                 <button onclick="executeDeckCommand('ping', 'enterprise')" class="action-button">ping</button>
                                 <button onclick="executeDeckCommand('dump', 'enterprise')" class="action-button">dump</button>
@@ -416,9 +518,15 @@
                         </div>
                         <div id="konnect" class="tab-content">
                             <h3>Konnect Control Plane</h3>
-                            <input type="text" id="konnect-cp" value="default"  placeholder="default" class="input-field" />
+                            <div class="input-group">
+                                <input type="text" id="konnect-cp" value="default"  placeholder="default" class="input-field" />
+                                <div id="konnect-cp-error" class="error-message"></div>
+                            </div>
                             <h3>PAT</h3>
-                            <input type="password" id="konnect-pat" placeholder="Enter Personal Access Token" class="input-field" />
+                            <div class="input-group">
+                                <input type="password" id="konnect-pat" placeholder="Enter Personal Access Token" class="input-field" />
+                                <div id="konnect-pat-error" class="error-message"></div>
+                            </div>
                             <div class="button-group">
                                 <button onclick="executeDeckCommand('ping', 'konnect')" class="action-button">ping</button>
                                 <button onclick="executeDeckCommand('dump', 'konnect')" class="action-button">dump</button>
